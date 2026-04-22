@@ -27,9 +27,12 @@ export default function Hero() {
         </div>
 
         {/* Título */}
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-none uppercase text-white break-words">
-          ANALIS - COSTUMS
-        </h1>
+     <h1 
+  className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight leading-none uppercase text-white whitespace-nowrap"
+  style={{ fontFamily: "var(--font-montserrat)" }}
+>
+  ANALIS - COSTUMS
+</h1>
 
         {/* Subtítulo */}
         <p className="mt-2 text-sm font-bold underline underline-offset-2 text-white">
@@ -37,14 +40,17 @@ export default function Hero() {
         </p>
 
         {/* Lista */}
-        <ul className="mt-3 text-sm space-y-1 text-gray-800 font-medium">
-          <li>👗 Ropa casual para la mujer moderna y real de hoy en día</li>
-          <li>🚚 Envíos a TODO el país</li>
-          <li>
-            <img src="https://flagcdn.com/w20/bo.png" alt="Bolivia" className="inline w-4 mr-1 mb-0.5" />
-            Hecho en BOLIVIA
-          </li>
-        </ul>
+        <ul 
+  className="mt-3 text-sm space-y-1 text-gray-800 font-medium"
+  style={{ fontFamily: "var(--font-montserrat)" }}
+>
+  <li>👗 Ropa casual para la mujer moderna y real de hoy en día</li>
+  <li>🚚 Envíos a TODO el país</li>
+  <li>
+    <img src="https://flagcdn.com/w20/bo.png" alt="Bolivia" className="inline w-4 mr-1 mb-0.5" />
+    Hecho en BOLIVIA
+  </li>
+</ul>
 
         {/* Botón CTA */}
         <Link

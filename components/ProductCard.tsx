@@ -54,11 +54,14 @@ export default function ProductCard({ producto }: { producto: Producto }) {
         {/* BOTÓN + CONTADOR */}
         <div className="flex items-center gap-2 mt-3">
           <button
-            onClick={() => addToCart(producto)}
-            className="flex-1 bg-teal-500 hover:bg-teal-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition"
-          >
-            🛒 COMPRAR AHORA
-          </button>
+  onClick={() => addToCart(producto)}
+  className="flex-1 bg-teal-500 hover:bg-teal-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 6h13M7 13L5.4 5M10 21a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+  </svg>
+  COMPRAR AHORA
+</button>
 
           <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-2 py-1">
             <button className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center">−</button>
