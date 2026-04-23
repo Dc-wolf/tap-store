@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-const categorias = ["Blusas", "Camison", "Pantalones", "Medias"];
+const categorias = ["Camisetas", "Pantalones", "Blusas", "Hoodies"];
 
 export default function FiltroCategoria() {
   const router = useRouter();

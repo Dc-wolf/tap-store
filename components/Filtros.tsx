@@ -13,6 +13,7 @@ export default function Filtros() {
       <FiltroCategoria />
       <FiltroTalla />
       <FiltroOferta />
+      
 
     </aside>
   );

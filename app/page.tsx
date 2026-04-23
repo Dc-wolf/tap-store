@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import Buscador from "@/components/Buscador";
 import Filtros from "@/components/Filtros";
 import Tabs from "@/components/Tabs";
 import ProductGrid from "@/components/ProductGrid";
@@ -10,10 +11,13 @@ import Footer from "@/components/Footer";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
+
 type FiltrosType = {
   categoria?: string;
   talla?: string;
   precio?: string;
+  oferta?: string;
+  buscar?: string;
 };
 
 type WhereInput = Prisma.productWhereInput;
@@ -33,6 +37,10 @@ async function getProductos(page: number, filtros: FiltrosType) {
     const [min, max] = filtros.precio.split("-");
     where.price = { gte: Number(min), lte: Number(max) };
   }
+  if (filtros.oferta === "true") where.oferta = true;
+  if (filtros.buscar) {
+  where.name = { contains: filtros.buscar };
+}
 
   const productos = await prisma.product.findMany({ where, skip, take: limit });
   const total = await prisma.product.count({ where });
@@ -48,6 +56,8 @@ export default async function Home({
     categoria?: string;
     talla?: string;
     precio?: string;
+    oferta?: string;
+    buscar?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -57,6 +67,8 @@ export default async function Home({
     categoria: params?.categoria,
     talla: params?.talla,
     precio: params?.precio,
+    oferta: params?.oferta,
+    buscar: params?.buscar,
   };
 
   const { productos, totalPages } = await getProductos(currentPage, filtros);
@@ -77,25 +89,11 @@ export default async function Home({
         </div>
 
         {/* BUSCADOR */}
-        <div className="flex mb-4 px-10 gap-2">
-          <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              🔍
-            </span>
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              className="border border-gray-300 p-2 pl-9 w-full rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
-            />
-          </div>
-          <button className="bg-black text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition">
-            Buscar
-          </button>
-        </div>
+       <Buscador />
 
         {/* TABS */}
         <div className="mb-6">
-          <Tabs />
+          <Tabs categoriaActiva={params?.categoria}/>
         </div>
 
         {/* GRID PRINCIPAL: FILTROS + PRODUCTOS */}

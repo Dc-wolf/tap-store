@@ -68,13 +68,9 @@ export default function Hero() {
       </div>
 
       {/* IMÁGENES - se ocultan en móvil, aparecen en md+ */}
-      <div className="hidden md:flex relative w-64 h-64 md:w-80 md:h-72 flex-shrink-0">
-        <img src="/hero/ropa1.png" alt="ropa" className="absolute top-0 left-8 w-28 md:w-36 drop-shadow-lg" />
-        <img src="/hero/jeans.png" alt="jeans" className="absolute top-0 right-0 w-20 md:w-24 drop-shadow-lg" />
-        <img src="/hero/reloj.png" alt="reloj" className="absolute top-1/2 right-8 w-12 md:w-16 -translate-y-1/2 drop-shadow-lg" />
-        <img src="/hero/bolso.png" alt="bolso" className="absolute bottom-0 left-0 w-24 md:w-28 drop-shadow-lg" />
-        <img src="/hero/zapatos.png" alt="zapatos" className="absolute bottom-0 right-0 w-24 md:w-28 drop-shadow-lg" />
-      </div>
+      <div className="hidden md:flex relative w-64 h-64 md:w-80 md:h-72 flex-shrink-0 items-center justify-center">
+  <img src="/hero/imagen_taptap.png" alt="taptap" className="w-full h-full object-contain drop-shadow-lg" />
+</div>
 
     </section>
   );

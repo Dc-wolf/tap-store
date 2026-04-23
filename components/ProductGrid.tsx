@@ -5,6 +5,9 @@ type Producto = {
   name: string;
   category: string;
   price: number;
+  image?: string | null;       // ← agregar
+  description?: string | null; // ← agregar
+  stock?: number;              // ← agregar (este es el clave)
 };
 
 export default function ProductGrid({ productos }: { productos: Producto[] }) {

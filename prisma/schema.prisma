@@ -8,26 +8,20 @@ datasource db {
 }
 
 model product {
-  id                   Int      @id @default(autoincrement())
-  name                 String
-  code                 String   @unique
-
-  category             String
-  price                Float
-  stock                Int
-
-  talla                String   // 🔥 importante (no array)
-  oferta               Boolean  @default(false)
-
-  visibility           String   @default("public")
-  status               String   @default("active")
-
-  description          String?
-  image                String?  @db.LongText
-
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-
-  ownerId              Int
-  commissionPercentage Float    @default(0)
+  id                   Int       @id @default(autoincrement())
+  name                 String?   @db.VarChar(255)
+  code                 String?   @unique(map: "code") @db.VarChar(50)
+  category             String?   @db.VarChar(100)
+  price                Float?    @db.Float
+  stock                Int?
+  talla                String?   @db.VarChar(50)
+  oferta               Boolean?  @default(false)
+  visibility           String?   @default("public") @db.VarChar(50)
+  status               String?   @default("active") @db.VarChar(50)
+  description          String?   @db.Text
+  image                String?   @db.LongText
+  createdAt            DateTime? @default(now()) @db.DateTime(0)
+  updatedAt            DateTime? @default(now()) @updatedAt @db.DateTime(0)
+  ownerId              Int?
+  commissionPercentage Float?    @default(10) @db.Float
 }
