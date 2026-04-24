@@ -23,7 +23,7 @@ type CartItem = {
 };
 
 export default function ProductCard({ producto }: { producto: Producto }) {
-  const { addToCart, cart, increaseQuantity, decreaseQuantity } = useCart();
+  const { addToCart, replaceCart, cart, increaseQuantity, decreaseQuantity } = useCart();
   const router = useRouter();
   const [modalAbierto, setModalAbierto] = useState(false);
 
@@ -45,9 +45,8 @@ export default function ProductCard({ producto }: { producto: Producto }) {
   };
 
   const comprarAhora = () => {
-    if (cantidad === 0) {
-      addToCart(producto);
-    }
+    // Reemplaza el carrito con este producto y la cantidad actual (mínimo 1)
+    replaceCart(producto, cantidad > 0 ? cantidad : 1);
     router.push("/checkout");
   };
 

@@ -15,8 +15,10 @@ type CartItem = Producto & {
 type CartContextType = {
   cart: CartItem[];
   addToCart: (producto: Producto) => void;
+  replaceCart: (producto: Producto, quantity: number) => void; // ← nuevo
   increaseQuantity: (id: number) => void;
   decreaseQuantity: (id: number) => void;
+  clearCart: () => void; // ← nuevo
 };
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -38,6 +40,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  // Reemplaza TODO el carrito con 1 solo producto y su cantidad
+  const replaceCart = (producto: Producto, quantity: number) => {
+    setCart([{ ...producto, quantity }]);
+  };
+
   const increaseQuantity = (id: number) => {
     setCart((prev) =>
       prev.map((item) =>
@@ -56,8 +63,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const clearCart = () => setCart([]);
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, increaseQuantity, decreaseQuantity }}>
+    <CartContext.Provider value={{ cart, addToCart, replaceCart, increaseQuantity, decreaseQuantity, clearCart }}>
       {children}
     </CartContext.Provider>
   );
