@@ -3,12 +3,12 @@ import { useState } from "react";
 
 type Producto = {
   id: number;
-  name: string;
-  price: number;
-  category?: string;
+  name: string | null;
+  price: number | null;
+  category?: string | null;
   image?: string | null;
   description?: string | null;
-  stock?: number;
+  stock?: number | null;
 };
 
 function generarGaleria(producto: Producto): string[] {
@@ -43,11 +43,11 @@ export default function ProductoModal({
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-      onClick={onClose} // click fuera cierra
+      onClick={onClose}
     >
       <div
         className="bg-white rounded-2xl max-w-lg w-full p-5 relative"
-        onClick={(e) => e.stopPropagation()} // evita cerrar al clickear adentro
+        onClick={(e) => e.stopPropagation()}
       >
         {/* CERRAR */}
         <button
@@ -61,7 +61,7 @@ export default function ProductoModal({
         <img
           src={imagenActiva}
           className="w-full h-64 object-cover rounded-xl mb-3"
-          alt={producto.name}
+          alt={producto.name ?? "Producto"}
         />
 
         {/* GALERÍA */}
@@ -78,14 +78,14 @@ export default function ProductoModal({
         </div>
 
         {/* INFO */}
-        <h2 className="text-xl font-bold text-gray-900">{producto.name}</h2>
+        <h2 className="text-xl font-bold text-gray-900">{producto.name ?? "Sin nombre"}</h2>
         <p className="text-gray-500 text-sm mt-1 mb-3">
           {producto.description || "Sin descripción"}
         </p>
 
         <div className="flex items-center justify-between">
           <p className="text-green-500 font-bold text-2xl">
-            Bs. {convertirABS(producto.price)}
+            Bs. {convertirABS(producto.price ?? 0)}
           </p>
           <p className="text-sm text-gray-400">
             Stock disponible: <span className="font-semibold text-gray-600">{producto.stock ?? 0}</span>

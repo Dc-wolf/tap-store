@@ -2,12 +2,12 @@ import ProductCard from "./ProductCard";
 
 type Producto = {
   id: number;
-  name: string;
-  category: string;
-  price: number;
-  image?: string | null;       // ← agregar
-  description?: string | null; // ← agregar
-  stock?: number;              // ← agregar (este es el clave)
+  name: string | null;
+  category: string | null;
+  price: number | null;
+  image?: string | null;
+  description?: string | null;
+  stock?: number | null;
 };
 
 export default function ProductGrid({ productos }: { productos: Producto[] }) {

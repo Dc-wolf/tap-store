@@ -7,12 +7,12 @@ import ProductoModal from "./ProductoModal";
 
 type Producto = {
   id: number;
-  name: string;
-  price: number;
-  category?: string;
+  name: string | null;
+  price: number | null;
+  category?: string | null;
   image?: string | null;
   description?: string | null;
-  stock?: number;
+  stock?: number | null;
 };
 
 type CartItem = {
@@ -38,15 +38,14 @@ export default function ProductCard({ producto }: { producto: Producto }) {
   const handleIncrease = () => {
     if (cantidad >= stockDisponible) return;
     if (cantidad === 0) {
-      addToCart(producto);
+      addToCart({ ...producto, name: producto.name ?? "", price: producto.price ?? 0 });
     } else {
       increaseQuantity(producto.id);
     }
   };
 
   const comprarAhora = () => {
-    // Reemplaza el carrito con este producto y la cantidad actual (mínimo 1)
-    replaceCart(producto, cantidad > 0 ? cantidad : 1);
+    replaceCart({ ...producto, name: producto.name ?? "", price: producto.price ?? 0 }, cantidad > 0 ? cantidad : 1);
     router.push("/checkout");
   };
 
@@ -54,12 +53,12 @@ export default function ProductCard({ producto }: { producto: Producto }) {
     <>
       <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden">
 
-        {/* IMAGEN CON BADGE — click abre modal */}
+        {/* IMAGEN CON BADGE */}
         <div className="relative cursor-pointer" onClick={() => setModalAbierto(true)}>
           <img
             src={producto.image || `https://picsum.photos/300/300?random=${producto.id}`}
             className="w-full h-52 object-cover"
-            alt={producto.name}
+            alt={producto.name ?? "Producto"}
           />
           <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
             Popular
@@ -68,13 +67,13 @@ export default function ProductCard({ producto }: { producto: Producto }) {
 
         {/* INFO */}
         <div className="p-4">
-          <h3 className="font-bold text-gray-900 text-base">{producto.name}</h3>
+          <h3 className="font-bold text-gray-900 text-base">{producto.name ?? "Sin nombre"}</h3>
           <p className="text-gray-400 text-sm mt-0.5 truncate">
             {producto.description || "Sin descripción"}
           </p>
 
           <p className="text-green-500 font-bold text-xl mt-2">
-            Bs. {convertirABS(producto.price)}
+            Bs. {convertirABS(producto.price ?? 0)}
           </p>
 
           {/* BOTÓN + CONTADOR */}
