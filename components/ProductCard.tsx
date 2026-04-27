@@ -26,6 +26,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
   const { addToCart, replaceCart, cart, increaseQuantity, decreaseQuantity } = useCart();
   const router = useRouter();
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [inputValue, setInputValue] = useState<string>("0");
 
   function convertirABS(precioUSD: number) {
     const tasa = 6.96;
@@ -39,13 +40,37 @@ export default function ProductCard({ producto }: { producto: Producto }) {
     if (cantidad >= stockDisponible) return;
     if (cantidad === 0) {
       addToCart({ ...producto, name: producto.name ?? "", price: producto.price ?? 0 });
+      setInputValue("1");
     } else {
       increaseQuantity(producto.id);
+      setInputValue(String(cantidad + 1));
+    }
+  };
+
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+  };
+
+  const handleInputBlur = () => {
+    const parsed = parseInt(inputValue, 10);
+    const clamped =
+      isNaN(parsed) || parsed < 1
+        ? cantidad
+        : Math.min(parsed, stockDisponible);
+    setInputValue(String(clamped));
+    if (clamped !== cantidad) {
+      replaceCart(
+        { ...producto, name: producto.name ?? "", price: producto.price ?? 0 },
+        clamped
+      );
     }
   };
 
   const comprarAhora = () => {
-    replaceCart({ ...producto, name: producto.name ?? "", price: producto.price ?? 0 }, cantidad > 0 ? cantidad : 1);
+    replaceCart(
+      { ...producto, name: producto.name ?? "", price: producto.price ?? 0 },
+      cantidad > 0 ? cantidad : 1
+    );
     router.push("/checkout");
   };
 
@@ -90,14 +115,32 @@ export default function ProductCard({ producto }: { producto: Producto }) {
 
             <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-2 py-1">
               <button
-                onClick={() => decreaseQuantity(producto.id)}
+                onClick={() => {
+                  decreaseQuantity(producto.id);
+                  setInputValue(String(Math.max(0, cantidad - 1)));
+                }}
                 className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center"
               >−</button>
-              <span className="text-sm font-semibold w-4 text-center">{cantidad}</span>
+              <input
+                type="number"
+                min={1}
+                max={stockDisponible}
+                value={inputValue}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onBlur={handleInputBlur}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleInputBlur();
+                }}
+                className="w-10 text-center text-sm font-semibold border-none outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
               <button
                 onClick={handleIncrease}
                 disabled={cantidad >= stockDisponible}
-                className={`text-lg font-bold w-6 text-center ${cantidad >= stockDisponible ? "text-gray-300 cursor-not-allowed" : "text-gray-500 hover:text-black"}`}
+                className={`text-lg font-bold w-6 text-center ${
+                  cantidad >= stockDisponible
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-gray-500 hover:text-black"
+                }`}
               >+</button>
             </div>
           </div>

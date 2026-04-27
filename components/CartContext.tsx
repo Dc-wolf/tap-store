@@ -6,6 +6,8 @@ type Producto = {
   id: number;
   name: string;
   price: number;
+  image?: string | null;  
+  stock?: number | null;  
 };
 
 type CartItem = Producto & {
@@ -15,10 +17,10 @@ type CartItem = Producto & {
 type CartContextType = {
   cart: CartItem[];
   addToCart: (producto: Producto) => void;
-  replaceCart: (producto: Producto, quantity: number) => void; // ← nuevo
+  replaceCart: (producto: Producto, quantity: number) => void;
   increaseQuantity: (id: number) => void;
   decreaseQuantity: (id: number) => void;
-  clearCart: () => void; // ← nuevo
+  clearCart: () => void;
 };
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -40,7 +42,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  // Reemplaza TODO el carrito con 1 solo producto y su cantidad
   const replaceCart = (producto: Producto, quantity: number) => {
     setCart([{ ...producto, quantity }]);
   };

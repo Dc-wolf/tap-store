@@ -22,16 +22,21 @@ const validarNombre = (valor: string): string | undefined => {
   const trimmed = valor.trim();
   if (!trimmed) return "El nombre es obligatorio.";
   if (/\d/.test(trimmed)) return "El nombre no puede contener números.";
-  if (/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]/.test(trimmed)) return "Solo se permiten letras y espacios.";
+  if (/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]/.test(trimmed))
+    return "Solo se permiten letras y espacios.";
   if (trimmed.length < 3) return "Mínimo 3 caracteres.";
   if (trimmed.length > 60) return "Máximo 60 caracteres.";
+  const palabras = trimmed.split(/\s+/).filter(Boolean);
+  if (palabras.length < 2) return "Ingresa al menos nombre y apellido.";
+  if (palabras.length > 4) return "Máximo 4 palabras.";
   return undefined;
 };
 
 const validarTelefono = (valor: string): string | undefined => {
   const trimmed = valor.trim();
   if (!trimmed) return "El teléfono es obligatorio.";
-  if (!/^[67]\d{7}$/.test(trimmed)) return "Debe ser un celular boliviano válido (ej: 70012345).";
+  if (!/^[67]\d{7}$/.test(trimmed))
+    return "Debe ser un celular boliviano válido (ej: 70012345).";
   return undefined;
 };
 
@@ -40,7 +45,8 @@ const validarDireccion = (valor: string): string | undefined => {
   if (!trimmed) return "La dirección es obligatoria.";
   if (trimmed.length < 10) return "Mínimo 10 caracteres.";
   if (trimmed.length > 80) return "Máximo 80 caracteres.";
-  if (!/[a-zA-Z0-9]/.test(trimmed)) return "La dirección debe contener letras o números reales.";
+  if (!/[a-zA-Z0-9]/.test(trimmed))
+    return "La dirección debe contener letras o números reales.";
   return undefined;
 };
 
@@ -61,7 +67,9 @@ function Stepper({ pasoActual }: { pasoActual: number }) {
             </div>
             <span
               className={`text-xs mt-1 ${
-                i <= pasoActual ? "text-teal-500 font-semibold" : "text-gray-400"
+                i <= pasoActual
+                  ? "text-teal-500 font-semibold"
+                  : "text-gray-400"
               }`}
             >
               {paso}
@@ -98,8 +106,7 @@ function PasoIdentificacion({
     direccion: validarDireccion(datos.direccion),
   };
 
-  const valido =
-    !errores.nombre && !errores.telefono && !errores.direccion;
+  const valido = !errores.nombre && !errores.telefono && !errores.direccion;
 
   const marcarTocado = (campo: string) =>
     setTocados((prev) => ({ ...prev, [campo]: true }));
@@ -112,7 +119,9 @@ function PasoIdentificacion({
       <h2 className="text-2xl font-bold text-gray-900 mb-1">
         Datos para recibir su pedido
       </h2>
-      <p className="text-gray-400 text-sm mb-6">Completa tus datos de entrega</p>
+      <p className="text-gray-400 text-sm mb-6">
+        Completa tus datos de entrega
+      </p>
 
       <div className="flex flex-col gap-4">
         {/* NOMBRE */}
@@ -122,7 +131,7 @@ function PasoIdentificacion({
           </label>
           <input
             type="text"
-            placeholder="Ej: Juan Pérez"
+            placeholder="Ej: Juan Carlos Pérez"
             value={datos.nombre}
             onChange={(e) => setDatos({ ...datos, nombre: e.target.value })}
             onBlur={() => marcarTocado("nombre")}
@@ -134,7 +143,9 @@ function PasoIdentificacion({
             }`}
           />
           {mostrarError("nombre") && (
-            <p className="text-red-500 text-xs mt-1">{mostrarError("nombre")}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {mostrarError("nombre")}
+            </p>
           )}
         </div>
 
@@ -160,7 +171,9 @@ function PasoIdentificacion({
             }`}
           />
           {mostrarError("telefono") && (
-            <p className="text-red-500 text-xs mt-1">{mostrarError("telefono")}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {mostrarError("telefono")}
+            </p>
           )}
         </div>
 
@@ -184,7 +197,9 @@ function PasoIdentificacion({
           />
           <div className="flex justify-between items-start mt-1">
             {mostrarError("direccion") ? (
-              <p className="text-red-500 text-xs">{mostrarError("direccion")}</p>
+              <p className="text-red-500 text-xs">
+                {mostrarError("direccion")}
+              </p>
             ) : (
               <span />
             )}
@@ -220,13 +235,38 @@ function PasoPedido({
 }) {
   const { cart, increaseQuantity, decreaseQuantity } = useCart();
 
+  const [inputValues, setInputValues] = useState<Record<number, string>>(() =>
+    Object.fromEntries(cart.map((i) => [i.id, String(i.quantity)])),
+  );
+
   const tasa = 6.96;
   const subtotalBs = cart.reduce(
     (acc, i) => acc + i.price * tasa * i.quantity,
-    0
+    0,
   );
   const deliveryBs = 15;
   const totalBs = subtotalBs + deliveryBs;
+
+  const handleInputChange = (id: number, valor: string) => {
+    setInputValues((prev) => ({ ...prev, [id]: valor }));
+  };
+
+  const handleInputBlur = (id: number, stockMax: number) => {
+    const num = parseInt(inputValues[id]);
+    const item = cart.find((i) => i.id === id);
+    if (!item) return;
+
+    const final =
+      isNaN(num) || num < 1 ? item.quantity : Math.min(num, stockMax);
+    setInputValues((prev) => ({ ...prev, [id]: String(final) }));
+
+    const diff = final - item.quantity;
+    if (diff > 0) {
+      for (let k = 0; k < diff; k++) increaseQuantity(id);
+    } else if (diff < 0) {
+      for (let k = 0; k < Math.abs(diff); k++) decreaseQuantity(id);
+    }
+  };
 
   if (cart.length === 0) {
     return (
@@ -248,36 +288,90 @@ function PasoPedido({
 
       {/* ITEMS */}
       <div className="flex flex-col gap-4 mb-6">
-        {cart.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-center gap-4 border border-gray-100 rounded-xl p-3"
-          >
-            <div className="flex-1">
-              <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
-              <p className="text-teal-500 font-bold text-sm mt-0.5">
-                Bs. {(item.price * tasa * item.quantity).toFixed(0)}
-              </p>
+        {cart.map((item) => {
+          const stockMax = item.stock ?? 99;
+          const precioUnitarioBs = item.price * tasa;
+
+          return (
+            <div
+              key={item.id}
+              className="flex items-center gap-3 border border-gray-100 rounded-xl p-3"
+            >
+              {/* IMAGEN */}
+              <img
+                src={
+                  item.image ||
+                  `https://picsum.photos/300/300?random=${item.id}`
+                }
+                alt={item.name}
+                className="w-40 h-50 rounded-xl object-cover flex-shrink-0"
+              />
+
+              {/* INFO */}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900 text-sm truncate">
+                  {item.name}
+                </p>
+                <p className="text-teal-500 font-bold text-sm mt-0.5">
+                  Bs. {precioUnitarioBs.toFixed(0)} c/u
+                </p>
+              </div>
+
+              {/* CANTIDAD */}
+              <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center gap-1 border border-gray-200 rounded-xl px-2 py-1">
+                  <button
+                    onClick={() => {
+                      decreaseQuantity(item.id);
+                      setInputValues((prev) => ({
+                        ...prev,
+                        [item.id]: String(Math.max(1, item.quantity - 1)),
+                      }));
+                    }}
+                    className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    min={1}
+                    max={stockMax}
+                    value={inputValues[item.id] ?? item.quantity}
+                    onChange={(e) => handleInputChange(item.id, e.target.value)}
+                    onBlur={() => handleInputBlur(item.id, stockMax)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleInputBlur(item.id, stockMax);
+                    }}
+                    className="w-10 text-center text-sm font-semibold border-none outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <button
+                    onClick={() => {
+                      if (item.quantity >= stockMax) return;
+                      increaseQuantity(item.id);
+                      setInputValues((prev) => ({
+                        ...prev,
+                        [item.id]: String(item.quantity + 1),
+                      }));
+                    }}
+                    disabled={item.quantity >= stockMax}
+                    className={`text-lg font-bold w-6 text-center ${
+                      item.quantity >= stockMax
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-gray-500 hover:text-black"
+                    }`}
+                  >
+                    +
+                  </button>
+                </div>
+                {item.quantity >= stockMax && (
+                  <p className="text-red-400 text-xs">
+                    Stock máximo: {stockMax}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-2 py-1">
-              <button
-                onClick={() => decreaseQuantity(item.id)}
-                className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center"
-              >
-                −
-              </button>
-              <span className="text-sm font-semibold w-4 text-center">
-                {item.quantity}
-              </span>
-              <button
-                onClick={() => increaseQuantity(item.id)}
-                className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* RESUMEN */}
@@ -328,7 +422,7 @@ function PasoPago({
   const tasa = 6.96;
   const subtotalBs = cart.reduce(
     (acc, i) => acc + i.price * tasa * i.quantity,
-    0
+    0,
   );
   const totalBs = subtotalBs + 15;
 
@@ -356,13 +450,14 @@ function PasoPago({
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Método de pago</h2>
 
       <div className="border border-teal-200 bg-teal-50 rounded-2xl p-5 mb-4">
-        <p className="font-bold text-teal-700 mb-1">QR / Transferencia bancaria</p>
+        <p className="font-bold text-teal-700 mb-1">
+          QR / Transferencia bancaria
+        </p>
         <p className="text-sm text-teal-600 mb-3">
           Realiza el pago por el monto exacto:
         </p>
 
         <div className="bg-white rounded-xl p-4 text-center mb-3 border border-teal-100">
-          {/* Reemplaza este div con <img src="tu-qr.png" /> cuando tengas el QR */}
           <div className="w-32 h-32 bg-gray-100 rounded-lg mx-auto flex items-center justify-center text-gray-400 text-xs">
             QR aquí
           </div>
