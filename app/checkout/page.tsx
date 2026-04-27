@@ -4,14 +4,47 @@ import { useState } from "react";
 import { useCart } from "@/components/CartContext";
 import { useRouter } from "next/navigation";
 
-// ── TIPO ──────────────────────────────────────────────────
+// ── TIPOS ─────────────────────────────────────────────────
 type DatosCliente = {
   nombre: string;
   telefono: string;
   direccion: string;
 };
 
-// ── STEPPER ──────────────────────────────────────────────
+type ErroresCampo = {
+  nombre?: string;
+  telefono?: string;
+  direccion?: string;
+};
+
+// ── VALIDADORES ───────────────────────────────────────────
+const validarNombre = (valor: string): string | undefined => {
+  const trimmed = valor.trim();
+  if (!trimmed) return "El nombre es obligatorio.";
+  if (/\d/.test(trimmed)) return "El nombre no puede contener números.";
+  if (/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]/.test(trimmed)) return "Solo se permiten letras y espacios.";
+  if (trimmed.length < 3) return "Mínimo 3 caracteres.";
+  if (trimmed.length > 60) return "Máximo 60 caracteres.";
+  return undefined;
+};
+
+const validarTelefono = (valor: string): string | undefined => {
+  const trimmed = valor.trim();
+  if (!trimmed) return "El teléfono es obligatorio.";
+  if (!/^[67]\d{7}$/.test(trimmed)) return "Debe ser un celular boliviano válido (ej: 70012345).";
+  return undefined;
+};
+
+const validarDireccion = (valor: string): string | undefined => {
+  const trimmed = valor.trim();
+  if (!trimmed) return "La dirección es obligatoria.";
+  if (trimmed.length < 10) return "Mínimo 10 caracteres.";
+  if (trimmed.length > 80) return "Máximo 80 caracteres.";
+  if (!/[a-zA-Z0-9]/.test(trimmed)) return "La dirección debe contener letras o números reales.";
+  return undefined;
+};
+
+// ── STEPPER ───────────────────────────────────────────────
 const pasos = ["Identificación", "Tu Pedido", "Método de pago"];
 
 function Stepper({ pasoActual }: { pasoActual: number }) {
@@ -26,12 +59,20 @@ function Stepper({ pasoActual }: { pasoActual: number }) {
             >
               {i + 1}
             </div>
-            <span className={`text-xs mt-1 ${i <= pasoActual ? "text-teal-500 font-semibold" : "text-gray-400"}`}>
+            <span
+              className={`text-xs mt-1 ${
+                i <= pasoActual ? "text-teal-500 font-semibold" : "text-gray-400"
+              }`}
+            >
               {paso}
             </span>
           </div>
           {i < pasos.length - 1 && (
-            <div className={`w-20 h-1 mx-1 mb-5 rounded transition ${i < pasoActual ? "bg-teal-500" : "bg-gray-200"}`} />
+            <div
+              className={`w-20 h-1 mx-1 mb-5 rounded transition ${
+                i < pasoActual ? "bg-teal-500" : "bg-gray-200"
+              }`}
+            />
           )}
         </div>
       ))}
@@ -49,53 +90,119 @@ function PasoIdentificacion({
   setDatos: (d: DatosCliente) => void;
   onSiguiente: () => void;
 }) {
-  const valido = datos.nombre.trim() && datos.telefono.trim() && datos.direccion.trim();
+  const [tocados, setTocados] = useState<Record<string, boolean>>({});
+
+  const errores: ErroresCampo = {
+    nombre: validarNombre(datos.nombre),
+    telefono: validarTelefono(datos.telefono),
+    direccion: validarDireccion(datos.direccion),
+  };
+
+  const valido =
+    !errores.nombre && !errores.telefono && !errores.direccion;
+
+  const marcarTocado = (campo: string) =>
+    setTocados((prev) => ({ ...prev, [campo]: true }));
+
+  const mostrarError = (campo: keyof ErroresCampo): string | undefined =>
+    tocados[campo] ? errores[campo] : undefined;
 
   return (
     <div className="max-w-md mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-1">Datos para recibir su pedido</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-1">
+        Datos para recibir su pedido
+      </h2>
       <p className="text-gray-400 text-sm mb-6">Completa tus datos de entrega</p>
 
       <div className="flex flex-col gap-4">
+        {/* NOMBRE */}
         <div>
-          <label className="text-sm font-semibold text-gray-700 mb-1 block">Nombre completo</label>
+          <label className="text-sm font-semibold text-gray-700 mb-1 block">
+            Nombre completo
+          </label>
           <input
             type="text"
             placeholder="Ej: Juan Pérez"
             value={datos.nombre}
             onChange={(e) => setDatos({ ...datos, nombre: e.target.value })}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+            onBlur={() => marcarTocado("nombre")}
+            maxLength={60}
+            className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 transition ${
+              mostrarError("nombre")
+                ? "border-red-400 focus:ring-red-300"
+                : "border-gray-200 focus:ring-teal-400"
+            }`}
           />
+          {mostrarError("nombre") && (
+            <p className="text-red-500 text-xs mt-1">{mostrarError("nombre")}</p>
+          )}
         </div>
 
+        {/* TELÉFONO */}
         <div>
-          <label className="text-sm font-semibold text-gray-700 mb-1 block">Teléfono</label>
+          <label className="text-sm font-semibold text-gray-700 mb-1 block">
+            Teléfono
+          </label>
           <input
             type="tel"
             placeholder="Ej: 70012345"
             value={datos.telefono}
-            onChange={(e) => setDatos({ ...datos, telefono: e.target.value })}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+            onChange={(e) => {
+              const soloDigitos = e.target.value.replace(/\D/g, "").slice(0, 8);
+              setDatos({ ...datos, telefono: soloDigitos });
+            }}
+            onBlur={() => marcarTocado("telefono")}
+            maxLength={8}
+            className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 transition ${
+              mostrarError("telefono")
+                ? "border-red-400 focus:ring-red-300"
+                : "border-gray-200 focus:ring-teal-400"
+            }`}
           />
+          {mostrarError("telefono") && (
+            <p className="text-red-500 text-xs mt-1">{mostrarError("telefono")}</p>
+          )}
         </div>
 
+        {/* DIRECCIÓN */}
         <div>
-          <label className="text-sm font-semibold text-gray-700 mb-1 block">Dirección de entrega</label>
+          <label className="text-sm font-semibold text-gray-700 mb-1 block">
+            Dirección de entrega
+          </label>
           <textarea
             placeholder="Ej: Av. Siempre Viva 123, La Paz"
             value={datos.direccion}
             onChange={(e) => setDatos({ ...datos, direccion: e.target.value })}
+            onBlur={() => marcarTocado("direccion")}
             rows={3}
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 resize-none"
+            maxLength={80}
+            className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 resize-none transition ${
+              mostrarError("direccion")
+                ? "border-red-400 focus:ring-red-300"
+                : "border-gray-200 focus:ring-teal-400"
+            }`}
           />
+          <div className="flex justify-between items-start mt-1">
+            {mostrarError("direccion") ? (
+              <p className="text-red-500 text-xs">{mostrarError("direccion")}</p>
+            ) : (
+              <span />
+            )}
+            <span className="text-xs text-gray-300 ml-auto">
+              {datos.direccion.length}/80
+            </span>
+          </div>
         </div>
       </div>
 
       <button
         onClick={onSiguiente}
         disabled={!valido}
-        className={`w-full mt-6 py-3 rounded-xl font-bold text-white transition
-          ${valido ? "bg-teal-500 hover:bg-teal-600" : "bg-gray-200 cursor-not-allowed text-gray-400"}`}
+        className={`w-full mt-6 py-3 rounded-xl font-bold text-white transition ${
+          valido
+            ? "bg-teal-500 hover:bg-teal-600"
+            : "bg-gray-200 cursor-not-allowed text-gray-400"
+        }`}
       >
         Continuar →
       </button>
@@ -114,7 +221,10 @@ function PasoPedido({
   const { cart, increaseQuantity, decreaseQuantity } = useCart();
 
   const tasa = 6.96;
-  const subtotalBs = cart.reduce((acc, i) => acc + i.price * tasa * i.quantity, 0);
+  const subtotalBs = cart.reduce(
+    (acc, i) => acc + i.price * tasa * i.quantity,
+    0
+  );
   const deliveryBs = 15;
   const totalBs = subtotalBs + deliveryBs;
 
@@ -122,7 +232,12 @@ function PasoPedido({
     return (
       <div className="max-w-md mx-auto text-center">
         <p className="text-gray-400 text-lg">Tu carrito está vacío.</p>
-        <button onClick={onAtras} className="mt-4 text-teal-500 underline text-sm">← Volver</button>
+        <button
+          onClick={onAtras}
+          className="mt-4 text-teal-500 underline text-sm"
+        >
+          ← Volver
+        </button>
       </div>
     );
   }
@@ -134,7 +249,10 @@ function PasoPedido({
       {/* ITEMS */}
       <div className="flex flex-col gap-4 mb-6">
         {cart.map((item) => (
-          <div key={item.id} className="flex items-center gap-4 border border-gray-100 rounded-xl p-3">
+          <div
+            key={item.id}
+            className="flex items-center gap-4 border border-gray-100 rounded-xl p-3"
+          >
             <div className="flex-1">
               <p className="font-semibold text-gray-900 text-sm">{item.name}</p>
               <p className="text-teal-500 font-bold text-sm mt-0.5">
@@ -145,12 +263,18 @@ function PasoPedido({
               <button
                 onClick={() => decreaseQuantity(item.id)}
                 className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center"
-              >−</button>
-              <span className="text-sm font-semibold w-4 text-center">{item.quantity}</span>
+              >
+                −
+              </button>
+              <span className="text-sm font-semibold w-4 text-center">
+                {item.quantity}
+              </span>
               <button
                 onClick={() => increaseQuantity(item.id)}
                 className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center"
-              >+</button>
+              >
+                +
+              </button>
             </div>
           </div>
         ))}
@@ -199,19 +323,30 @@ function PasoPago({
   onAtras: () => void;
 }) {
   const { cart, clearCart } = useCart();
-const [confirmado, setConfirmado] = useState(false);
+  const [confirmado, setConfirmado] = useState(false);
 
-const tasa = 6.96;
-const subtotalBs = cart.reduce((acc, i) => acc + i.price * tasa * i.quantity, 0);
-const totalBs = subtotalBs + 15;
+  const tasa = 6.96;
+  const subtotalBs = cart.reduce(
+    (acc, i) => acc + i.price * tasa * i.quantity,
+    0
+  );
+  const totalBs = subtotalBs + 15;
 
   if (confirmado) {
     return (
       <div className="max-w-md mx-auto text-center py-10">
         <div className="text-5xl mb-4">✅</div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Pedido confirmado!</h2>
-        <p className="text-gray-500 text-sm mb-1">Gracias, <span className="font-semibold">{datos.nombre}</span></p>
-        <p className="text-gray-500 text-sm">Te contactaremos al <span className="font-semibold">{datos.telefono}</span> para coordinar la entrega.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          ¡Pedido confirmado!
+        </h2>
+        <p className="text-gray-500 text-sm mb-1">
+          Gracias, <span className="font-semibold">{datos.nombre}</span>
+        </p>
+        <p className="text-gray-500 text-sm">
+          Te contactaremos al{" "}
+          <span className="font-semibold">{datos.telefono}</span> para coordinar
+          la entrega.
+        </p>
       </div>
     );
   }
@@ -222,7 +357,9 @@ const totalBs = subtotalBs + 15;
 
       <div className="border border-teal-200 bg-teal-50 rounded-2xl p-5 mb-4">
         <p className="font-bold text-teal-700 mb-1">QR / Transferencia bancaria</p>
-        <p className="text-sm text-teal-600 mb-3">Realiza el pago por el monto exacto:</p>
+        <p className="text-sm text-teal-600 mb-3">
+          Realiza el pago por el monto exacto:
+        </p>
 
         <div className="bg-white rounded-xl p-4 text-center mb-3 border border-teal-100">
           {/* Reemplaza este div con <img src="tu-qr.png" /> cuando tengas el QR */}
@@ -252,7 +389,8 @@ const totalBs = subtotalBs + 15;
       </div>
 
       <p className="text-xs text-gray-400 text-center mb-6">
-        Una vez realizado el pago, confirma tu pedido y nos comunicaremos contigo.
+        Una vez realizado el pago, confirma tu pedido y nos comunicaremos
+        contigo.
       </p>
 
       <div className="flex gap-3">
@@ -263,14 +401,14 @@ const totalBs = subtotalBs + 15;
           ← Atrás
         </button>
         <button
-  onClick={() => {
-    clearCart();
-    setConfirmado(true);
-  }}
-  className="flex-1 py-3 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-bold transition"
->
-  Confirmar pedido ✓
-</button>
+          onClick={() => {
+            clearCart();
+            setConfirmado(true);
+          }}
+          className="flex-1 py-3 rounded-xl bg-teal-500 hover:bg-teal-600 text-white font-bold transition"
+        >
+          Confirmar pedido ✓
+        </button>
       </div>
     </div>
   );
@@ -280,7 +418,11 @@ const totalBs = subtotalBs + 15;
 export default function CheckoutPage() {
   const router = useRouter();
   const [pasoActual, setPasoActual] = useState(0);
-  const [datos, setDatos] = useState<DatosCliente>({ nombre: "", telefono: "", direccion: "" });
+  const [datos, setDatos] = useState<DatosCliente>({
+    nombre: "",
+    telefono: "",
+    direccion: "",
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -312,10 +454,7 @@ export default function CheckoutPage() {
           />
         )}
         {pasoActual === 2 && (
-          <PasoPago
-            datos={datos}
-            onAtras={() => setPasoActual(1)}
-          />
+          <PasoPago datos={datos} onAtras={() => setPasoActual(1)} />
         )}
       </div>
     </div>
