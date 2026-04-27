@@ -16,7 +16,11 @@ function generarGaleria(producto: Producto): string[] {
     return producto.image.split(",");
   }
   if (producto.image && producto.image.trim() !== "") {
-    return [producto.image, producto.image, producto.image];
+    return [
+      producto.image,
+      `https://picsum.photos/400/300?random=${producto.id}b`,
+      `https://picsum.photos/400/300?random=${producto.id}c`,
+    ];
   }
   return [
     `https://picsum.photos/400/300?random=${producto.id}a`,
@@ -78,19 +82,16 @@ export default function ProductoModal({
         </div>
 
         {/* INFO */}
-        <h2 className="text-xl font-bold text-gray-900">{producto.name ?? "Sin nombre"}</h2>
+        <h2 className="text-xl font-bold text-gray-900">
+          {producto.name ?? "Sin nombre"}
+        </h2>
         <p className="text-gray-500 text-sm mt-1 mb-3">
           {producto.description || "Sin descripción"}
         </p>
 
-        <div className="flex items-center justify-between">
-          <p className="text-green-500 font-bold text-2xl">
-            Bs. {convertirABS(producto.price ?? 0)}
-          </p>
-          <p className="text-sm text-gray-400">
-            Stock disponible: <span className="font-semibold text-gray-600">{producto.stock ?? 0}</span>
-          </p>
-        </div>
+        <p className="text-green-500 font-bold text-2xl">
+          Bs. {convertirABS(producto.price ?? 0)}
+        </p>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect ,useRef } from "react";
 import { useCart } from "@/components/CartContext";
 import { useRouter } from "next/navigation";
 
@@ -409,6 +409,7 @@ function PasoPedido({
 }
 
 // ── PASO 3 — MÉTODO DE PAGO ───────────────────────────────
+// ── PASO 3 — MÉTODO DE PAGO ───────────────────────────────
 function PasoPago({
   datos,
   onAtras,
@@ -418,28 +419,57 @@ function PasoPago({
 }) {
   const { cart, clearCart } = useCart();
   const [confirmado, setConfirmado] = useState(false);
+  const [qrImage, setQrImage] = useState<string | null>(null);
+  const [qrError, setQrError] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(false);
 
   const tasa = 6.96;
-  const subtotalBs = cart.reduce(
-    (acc, i) => acc + i.price * tasa * i.quantity,
-    0,
-  );
+  const subtotalBs = cart.reduce((acc, i) => acc + i.price * tasa * i.quantity, 0);
   const totalBs = subtotalBs + 15;
+
+  // Genera el QR al montar el componente
+  const qrGenerado = useRef(false);
+
+useEffect(() => {
+  if (qrGenerado.current) return;
+  qrGenerado.current = true;
+
+  const generarQR = async () => {
+    setCargando(true);
+    setQrError(null);
+    try {
+      const res = await fetch("/api/qr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: totalBs }),
+      });
+      const data = await res.json();
+      if (data.data?.image_base64) {
+        setQrImage(data.data.image_base64);
+      } else {
+        setQrError("No se pudo generar el QR. Intenta de nuevo.");
+      }
+    } catch {
+      setQrError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  generarQR();
+}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (confirmado) {
     return (
       <div className="max-w-md mx-auto text-center py-10">
         <div className="text-5xl mb-4">✅</div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          ¡Pedido confirmado!
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Pedido confirmado!</h2>
         <p className="text-gray-500 text-sm mb-1">
           Gracias, <span className="font-semibold">{datos.nombre}</span>
         </p>
         <p className="text-gray-500 text-sm">
           Te contactaremos al{" "}
-          <span className="font-semibold">{datos.telefono}</span> para coordinar
-          la entrega.
+          <span className="font-semibold">{datos.telefono}</span> para coordinar la entrega.
         </p>
       </div>
     );
@@ -450,42 +480,34 @@ function PasoPago({
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Método de pago</h2>
 
       <div className="border border-teal-200 bg-teal-50 rounded-2xl p-5 mb-4">
-        <p className="font-bold text-teal-700 mb-1">
-          QR / Transferencia bancaria
-        </p>
-        <p className="text-sm text-teal-600 mb-3">
-          Realiza el pago por el monto exacto:
-        </p>
+        <p className="font-bold text-teal-700 mb-1">QR — Banco BNB</p>
+        <p className="text-sm text-teal-600 mb-3">Escanea el QR con tu app bancaria:</p>
 
-        <div className="bg-white rounded-xl p-4 text-center mb-3 border border-teal-100">
-          <div className="w-32 h-32 bg-gray-100 rounded-lg mx-auto flex items-center justify-center text-gray-400 text-xs">
-            QR aquí
-          </div>
+        {/* QR */}
+        <div className="bg-white rounded-xl p-4 text-center mb-3 border border-teal-100 min-h-[160px] flex items-center justify-center">
+          {cargando && (
+            <p className="text-gray-400 text-sm">Generando QR...</p>
+          )}
+          {qrError && (
+            <p className="text-red-400 text-sm">{qrError}</p>
+          )}
+          {qrImage && !cargando && (
+            <img
+              src={`data:image/png;base64,${qrImage}`}
+              alt="QR de pago"
+              className="w-100 h-80 mx-auto"
+            />
+          )}
         </div>
 
-        <div className="flex flex-col gap-1 text-sm text-gray-600">
-          <div className="flex justify-between">
-            <span>Banco:</span>
-            <span className="font-semibold">Banco Ejemplo</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Cuenta:</span>
-            <span className="font-semibold">1234567890</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Titular:</span>
-            <span className="font-semibold">Tu Tienda SRL</span>
-          </div>
-          <div className="flex justify-between text-teal-600 font-bold text-base mt-2 border-t border-teal-100 pt-2">
-            <span>Monto a pagar:</span>
-            <span>Bs. {totalBs.toFixed(0)}</span>
-          </div>
+        <div className="flex justify-between text-teal-600 font-bold text-base border-t border-teal-100 pt-2">
+          <span>Monto a pagar:</span>
+          <span>Bs. {totalBs.toFixed(0)}</span>
         </div>
       </div>
 
       <p className="text-xs text-gray-400 text-center mb-6">
-        Una vez realizado el pago, confirma tu pedido y nos comunicaremos
-        contigo.
+        Una vez realizado el pago, confirma tu pedido y nos comunicaremos contigo.
       </p>
 
       <div className="flex gap-3">

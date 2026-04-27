@@ -35,7 +35,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
 
   const cantidad = cart.find((i: CartItem) => i.id === producto.id)?.quantity ?? 0;
   const stockDisponible = producto.stock ?? 0;
-
+  const displayValue = cantidad === 0 ? "0" : (inputValue === "0" ? String(cantidad) : inputValue);
   const handleIncrease = () => {
     if (cantidad >= stockDisponible) return;
     if (cantidad === 0) {
@@ -52,19 +52,19 @@ export default function ProductCard({ producto }: { producto: Producto }) {
   };
 
   const handleInputBlur = () => {
-    const parsed = parseInt(inputValue, 10);
-    const clamped =
-      isNaN(parsed) || parsed < 1
-        ? cantidad
-        : Math.min(parsed, stockDisponible);
-    setInputValue(String(clamped));
-    if (clamped !== cantidad) {
-      replaceCart(
-        { ...producto, name: producto.name ?? "", price: producto.price ?? 0 },
-        clamped
-      );
-    }
-  };
+  const parsed = parseInt(inputValue, 10);
+  const clamped =
+    isNaN(parsed) || parsed < 1
+      ? cantidad
+      : Math.min(parsed, stockDisponible);
+  setInputValue(String(clamped));
+  if (clamped !== cantidad) {
+    replaceCart(
+      { ...producto, name: producto.name ?? "", price: producto.price ?? 0 },
+      clamped
+    );
+  }
+};
 
   const comprarAhora = () => {
     replaceCart(
@@ -125,7 +125,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
                 type="number"
                 min={1}
                 max={stockDisponible}
-                value={inputValue}
+                value={displayValue}
                 onChange={(e) => handleInputChange(e.target.value)}
                 onBlur={handleInputBlur}
                 onKeyDown={(e) => {
