@@ -1,13 +1,25 @@
 import ProductCard from "./ProductCard";
 
+type Variante = {
+  id: number;
+  colorId: number;
+  sizeId: number;
+  stock: number;
+  color: { id: number; name: string; hex: string | null };
+  size: { id: number; name: string; order: number };
+};
+
 type Producto = {
   id: number;
   name: string | null;
   category: string | null;
+  categoryId?: number | null;
   price: number | null;
   image?: string | null;
   description?: string | null;
   stock?: number | null;
+  categoryRel?: { id: number; name: string; slug: string } | null;
+  variants?: Variante[];
 };
 
 export default function ProductGrid({ productos }: { productos: Producto[] }) {
