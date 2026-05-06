@@ -7,21 +7,125 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique @db.VarChar(100)
+  slug     String    @unique @db.VarChar(100)
+  products product[]
+}
+
+model color {
+  id       Int               @id @default(autoincrement())
+  name     String            @unique @db.VarChar(50)
+  hex      String?           @db.VarChar(10)
+  variants product_variant[]
+}
+
+model size {
+  id       Int               @id @default(autoincrement())
+  name     String            @unique @db.VarChar(20)
+  order    Int               @default(0)
+  variants product_variant[]
+}
+
 model product {
-  id                   Int       @id @default(autoincrement())
-  name                 String?   @db.VarChar(255)
-  code                 String?   @unique(map: "code") @db.VarChar(50)
-  category             String?   @db.VarChar(100)
-  price                Float?    @db.Float
+  id                   Int               @id @default(autoincrement())
+  name                 String?           @db.VarChar(255)
+  code                 String?           @unique(map: "code") @db.VarChar(191)
+  category             String?           @db.VarChar(191)
+  categoryId           Int?
+  price                Float?            @db.Float
   stock                Int?
-  talla                String?   @db.VarChar(50)
-  oferta               Boolean?  @default(false)
-  visibility           String?   @default("public") @db.VarChar(50)
-  status               String?   @default("active") @db.VarChar(50)
-  description          String?   @db.Text
-  image                String?   @db.LongText
-  createdAt            DateTime? @default(now()) @db.DateTime(0)
-  updatedAt            DateTime? @default(now()) @updatedAt @db.DateTime(0)
+  talla                String?           @db.VarChar(50)
+  oferta               Boolean?          @default(false)
+  visibility           String?           @default("public") @db.VarChar(191)
+  status               String?           @default("active") @db.VarChar(191)
+  description          String?           @db.Text
+  image                String?           @db.LongText
+  createdAt            DateTime?         @default(now()) @db.DateTime(3)
+  updatedAt            DateTime?         @default(now()) @updatedAt @db.DateTime(3)
   ownerId              Int?
-  commissionPercentage Float?    @default(10) @db.Float
+  commissionPercentage Float?            @default(10) @db.Float
+  categoryRel          category?         @relation(fields: [categoryId], references: [id])
+  variants             product_variant[]
+}
+
+model product_variant {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  colorId   Int
+  sizeId    Int
+  stock     Int     @default(0)
+  product   product @relation(fields: [productId], references: [id])
+  color     color   @relation(fields: [colorId], references: [id])
+  size      size    @relation(fields: [sizeId], references: [id])
+
+  @@unique([productId, colorId, sizeId])
+}
+
+model productimage {
+  id        Int       @id @default(autoincrement())
+  url       String?   @db.LongText
+  productId Int?
+  createdAt DateTime? @default(now()) @db.DateTime(3)
+}
+
+model order {
+  id            Int         @id @default(autoincrement())
+  customerName  String      @db.VarChar(191)
+  customerPhone String      @db.VarChar(191)
+  status        String      @default("pendiente") @db.VarChar(191)
+  total         Float       @db.Double
+  shippingCost  Float       @db.Double
+  sellerId      Int?
+  zoneId        Int?
+  createdAt     DateTime    @default(now()) @db.DateTime(3)
+  updatedAt     DateTime    @updatedAt @db.DateTime(3)
+  bankType      String?     @db.VarChar(191)
+  paymentKey    String?     @db.VarChar(191)
+  qrExpiration  DateTime?   @db.DateTime(3)
+  qrImage       String?     @db.LongText
+  items         orderitem[]
+}
+
+model orderitem {
+  id        Int    @id @default(autoincrement())
+  orderId   Int?
+  productId Int?
+  quantity  Int?
+  price     Float? @db.Float
+  order     order? @relation(fields: [orderId], references: [id])
+}
+
+model affiliation {
+  id         Int       @id @default(autoincrement())
+  sellerId   Int?
+  productId  Int?
+  commission Float?    @db.Float
+  createdAt  DateTime? @default(now()) @db.DateTime(3)
+}
+
+model zone {
+  id        Int       @id @default(autoincrement())
+  name      String?   @db.VarChar(255)
+  price     Float?    @db.Float
+  createdAt DateTime? @default(now()) @db.DateTime(3)
+}
+
+model user {
+  id                   Int       @id @default(autoincrement())
+  nombre               String    @db.VarChar(191)
+  apellido             String    @db.VarChar(191)
+  email                String    @unique @db.VarChar(191)
+  password             String    @db.VarChar(191)
+  whatsapp             String    @db.VarChar(191)
+  ciudad               String    @db.VarChar(191)
+  direccion            String    @db.VarChar(191)
+  empresa              String    @db.VarChar(191)
+  tiktok               String    @db.VarChar(191)
+  createdAt            DateTime  @default(now()) @db.DateTime(3)
+  updatedAt            DateTime  @updatedAt @db.DateTime(3)
+  passwordResetExpires DateTime? @db.DateTime(3)
+  passwordResetToken   String?   @unique @db.VarChar(191)
+  role                 String    @default("USER") @db.VarChar(50)
 }
