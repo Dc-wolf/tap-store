@@ -39,11 +39,6 @@ export default function ProductoModal({
   const imagenes = generarGaleria(producto);
   const [imagenActiva, setImagenActiva] = useState(imagenes[0]);
 
-  function convertirABS(precioUSD: number) {
-    const tasa = 6.96;
-    return (precioUSD * tasa).toFixed(0);
-  }
-
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -90,7 +85,7 @@ export default function ProductoModal({
         </p>
 
         <p className="text-green-500 font-bold text-2xl">
-          Bs. {convertirABS(producto.price ?? 0)}
+          Bs. {Number(producto.price ?? 0).toFixed(0)}
         </p>
       </div>
     </div>

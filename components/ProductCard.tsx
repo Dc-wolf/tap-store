@@ -28,14 +28,10 @@ export default function ProductCard({ producto }: { producto: Producto }) {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [inputValue, setInputValue] = useState<string>("0");
 
-  function convertirABS(precioUSD: number) {
-    const tasa = 6.96;
-    return (precioUSD * tasa).toFixed(0);
-  }
-
   const cantidad = cart.find((i: CartItem) => i.id === producto.id)?.quantity ?? 0;
   const stockDisponible = producto.stock ?? 0;
   const displayValue = cantidad === 0 ? "0" : (inputValue === "0" ? String(cantidad) : inputValue);
+
   const handleIncrease = () => {
     if (cantidad >= stockDisponible) return;
     if (cantidad === 0) {
@@ -52,19 +48,19 @@ export default function ProductCard({ producto }: { producto: Producto }) {
   };
 
   const handleInputBlur = () => {
-  const parsed = parseInt(inputValue, 10);
-  const clamped =
-    isNaN(parsed) || parsed < 1
-      ? cantidad
-      : Math.min(parsed, stockDisponible);
-  setInputValue(String(clamped));
-  if (clamped !== cantidad) {
-    replaceCart(
-      { ...producto, name: producto.name ?? "", price: producto.price ?? 0 },
-      clamped
-    );
-  }
-};
+    const parsed = parseInt(inputValue, 10);
+    const clamped =
+      isNaN(parsed) || parsed < 1
+        ? cantidad
+        : Math.min(parsed, stockDisponible);
+    setInputValue(String(clamped));
+    if (clamped !== cantidad) {
+      replaceCart(
+        { ...producto, name: producto.name ?? "", price: producto.price ?? 0 },
+        clamped
+      );
+    }
+  };
 
   const comprarAhora = () => {
     replaceCart(
@@ -98,7 +94,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
           </p>
 
           <p className="text-green-500 font-bold text-xl mt-2">
-            Bs. {convertirABS(producto.price ?? 0)}
+            Bs. {Number(producto.price ?? 0).toFixed(0)}
           </p>
 
           {/* BOTÓN + CONTADOR */}

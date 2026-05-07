@@ -32,6 +32,7 @@ type Producto = {
 };
 
 type FiltrosType = {
+  tipo?: string;
   categoria?: string;
   color?: string;
   talla?: string;
@@ -40,9 +41,18 @@ type FiltrosType = {
   buscar?: string;
 };
 
+const STOP_WORDS = ["color", "talla", "de", "en", "el", "la", "los", "las", "con", "y", "un", "una"];
+
 async function getProductos(page: number, filtros: FiltrosType) {
   const limit = 6;
   const skip = (page - 1) * limit;
+
+  const palabras = filtros.buscar
+    ? filtros.buscar
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((p) => p.length > 1 && !STOP_WORDS.includes(p))
+    : [];
 
   const variantFilter = {
     stock: { gt: 0 },
@@ -54,13 +64,32 @@ async function getProductos(page: number, filtros: FiltrosType) {
     status: "active",
     visibility: "public",
     variants: { some: variantFilter },
+    ...(filtros.tipo ? { categoryTypeRel: { slug: filtros.tipo } } : {}),
     ...(filtros.categoria ? { categoryRel: { slug: filtros.categoria } } : {}),
-    ...(filtros.precio ? (() => {
-      const [min, max] = filtros.precio!.split("-");
-      return { price: { gte: Number(min), lte: Number(max) } };
-    })() : {}),
+    ...(filtros.precio
+      ? (() => {
+          const [min, max] = filtros.precio!.split("-");
+          return { price: { gte: Number(min), lte: Number(max) } };
+        })()
+      : {}),
     ...(filtros.oferta === "true" ? { oferta: true } : {}),
-    ...(filtros.buscar ? { name: { contains: filtros.buscar } } : {}),
+    ...(palabras.length > 0
+      ? {
+          AND: palabras.map((palabra) => ({
+            OR: [
+              { name: { contains: palabra } },
+              { categoryRel: { name: { contains: palabra } } },
+              {
+                variants: {
+                  some: {
+                    color: { name: { contains: palabra } },
+                  },
+                },
+              },
+            ],
+          })),
+        }
+      : {}),
   };
 
   const [productos, total] = await Promise.all([
@@ -88,6 +117,7 @@ export default async function Home({
 }: {
   searchParams: Promise<{
     page?: string;
+    tipo?: string;
     categoria?: string;
     color?: string;
     talla?: string;
@@ -100,6 +130,7 @@ export default async function Home({
   const currentPage = Number(params?.page) || 1;
 
   const filtros: FiltrosType = {
+    tipo: params?.tipo,
     categoria: params?.categoria,
     color: params?.color,
     talla: params?.talla,
@@ -121,11 +152,11 @@ export default async function Home({
         </div>
         <Buscador />
         <div className="mb-6">
-          <Tabs categoriaActiva={params?.categoria} />
+          <Tabs tipoActivo={params?.tipo} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <aside className="w-full lg:w-80 flex-shrink-0">
-            <Filtros />
+            <Filtros tipo={params?.tipo} />
           </aside>
           <section className="lg:col-span-3">
             <ProductGrid productos={productos} />
