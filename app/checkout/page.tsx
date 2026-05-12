@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect ,useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/components/CartContext";
 import { useRouter } from "next/navigation";
 
-// ── TIPOS ─────────────────────────────────────────────────
 type DatosCliente = {
   nombre: string;
   telefono: string;
@@ -17,7 +16,6 @@ type ErroresCampo = {
   direccion?: string;
 };
 
-// ── VALIDADORES ───────────────────────────────────────────
 const validarNombre = (valor: string): string | undefined => {
   const trimmed = valor.trim();
   if (!trimmed) return "El nombre es obligatorio.";
@@ -50,7 +48,6 @@ const validarDireccion = (valor: string): string | undefined => {
   return undefined;
 };
 
-// ── STEPPER ───────────────────────────────────────────────
 const pasos = ["Identificación", "Tu Pedido", "Método de pago"];
 
 function Stepper({ pasoActual }: { pasoActual: number }) {
@@ -67,9 +64,7 @@ function Stepper({ pasoActual }: { pasoActual: number }) {
             </div>
             <span
               className={`text-xs mt-1 ${
-                i <= pasoActual
-                  ? "text-teal-500 font-semibold"
-                  : "text-gray-400"
+                i <= pasoActual ? "text-teal-500 font-semibold" : "text-gray-400"
               }`}
             >
               {paso}
@@ -88,7 +83,6 @@ function Stepper({ pasoActual }: { pasoActual: number }) {
   );
 }
 
-// ── PASO 1 — IDENTIFICACIÓN ───────────────────────────────
 function PasoIdentificacion({
   datos,
   setDatos,
@@ -107,10 +101,8 @@ function PasoIdentificacion({
   };
 
   const valido = !errores.nombre && !errores.telefono && !errores.direccion;
-
   const marcarTocado = (campo: string) =>
     setTocados((prev) => ({ ...prev, [campo]: true }));
-
   const mostrarError = (campo: keyof ErroresCampo): string | undefined =>
     tocados[campo] ? errores[campo] : undefined;
 
@@ -119,12 +111,9 @@ function PasoIdentificacion({
       <h2 className="text-2xl font-bold text-gray-900 mb-1">
         Datos para recibir su pedido
       </h2>
-      <p className="text-gray-400 text-sm mb-6">
-        Completa tus datos de entrega
-      </p>
+      <p className="text-gray-400 text-sm mb-6">Completa tus datos de entrega</p>
 
       <div className="flex flex-col gap-4">
-        {/* NOMBRE */}
         <div>
           <label className="text-sm font-semibold text-gray-700 mb-1 block">
             Nombre completo
@@ -143,13 +132,10 @@ function PasoIdentificacion({
             }`}
           />
           {mostrarError("nombre") && (
-            <p className="text-red-500 text-xs mt-1">
-              {mostrarError("nombre")}
-            </p>
+            <p className="text-red-500 text-xs mt-1">{mostrarError("nombre")}</p>
           )}
         </div>
 
-        {/* TELÉFONO */}
         <div>
           <label className="text-sm font-semibold text-gray-700 mb-1 block">
             Teléfono
@@ -171,13 +157,10 @@ function PasoIdentificacion({
             }`}
           />
           {mostrarError("telefono") && (
-            <p className="text-red-500 text-xs mt-1">
-              {mostrarError("telefono")}
-            </p>
+            <p className="text-red-500 text-xs mt-1">{mostrarError("telefono")}</p>
           )}
         </div>
 
-        {/* DIRECCIÓN */}
         <div>
           <label className="text-sm font-semibold text-gray-700 mb-1 block">
             Dirección de entrega
@@ -197,9 +180,7 @@ function PasoIdentificacion({
           />
           <div className="flex justify-between items-start mt-1">
             {mostrarError("direccion") ? (
-              <p className="text-red-500 text-xs">
-                {mostrarError("direccion")}
-              </p>
+              <p className="text-red-500 text-xs">{mostrarError("direccion")}</p>
             ) : (
               <span />
             )}
@@ -225,7 +206,6 @@ function PasoIdentificacion({
   );
 }
 
-// ── PASO 2 — TU PEDIDO ────────────────────────────────────
 function PasoPedido({
   onSiguiente,
   onAtras,
@@ -239,11 +219,7 @@ function PasoPedido({
     Object.fromEntries(cart.map((i) => [i.id, String(i.quantity)])),
   );
 
-  const tasa = 6.96;
-  const subtotalBs = cart.reduce(
-    (acc, i) => acc + i.price * tasa * i.quantity,
-    0,
-  );
+  const subtotalBs = cart.reduce((acc, i) => acc + i.price * i.quantity, 0);
   const deliveryBs = 15;
   const totalBs = subtotalBs + deliveryBs;
 
@@ -255,11 +231,9 @@ function PasoPedido({
     const num = parseInt(inputValues[id]);
     const item = cart.find((i) => i.id === id);
     if (!item) return;
-
     const final =
       isNaN(num) || num < 1 ? item.quantity : Math.min(num, stockMax);
     setInputValues((prev) => ({ ...prev, [id]: String(final) }));
-
     const diff = final - item.quantity;
     if (diff > 0) {
       for (let k = 0; k < diff; k++) increaseQuantity(id);
@@ -272,10 +246,7 @@ function PasoPedido({
     return (
       <div className="max-w-md mx-auto text-center">
         <p className="text-gray-400 text-lg">Tu carrito está vacío.</p>
-        <button
-          onClick={onAtras}
-          className="mt-4 text-teal-500 underline text-sm"
-        >
+        <button onClick={onAtras} className="mt-4 text-teal-500 underline text-sm">
           ← Volver
         </button>
       </div>
@@ -286,88 +257,84 @@ function PasoPedido({
     <div className="max-w-lg mx-auto">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Tu Pedido</h2>
 
-      {/* ITEMS */}
       <div className="flex flex-col gap-4 mb-6">
         {cart.map((item) => {
           const stockMax = item.stock ?? 99;
-          const precioUnitarioBs = item.price * tasa;
 
           return (
             <div
               key={item.id}
-              className="flex items-center gap-3 border border-gray-100 rounded-xl p-3"
+              className="border border-gray-100 rounded-xl p-3"
             >
-              {/* IMAGEN */}
-              <img
-                src={
-                  item.image ||
-                  `https://picsum.photos/300/300?random=${item.id}`
-                }
-                alt={item.name}
-                className="w-40 h-50 rounded-xl object-cover flex-shrink-0"
-              />
+              {/* NOMBRE ARRIBA */}
+              <p className="font-semibold text-gray-900 text-sm mb-2">
+                {item.name.length > 45
+                  ? item.name.slice(0, 45) + "..."
+                  : item.name}
+              </p>
 
-              {/* INFO */}
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm truncate">
-                  {item.name}
-                </p>
-                <p className="text-teal-500 font-bold text-sm mt-0.5">
-                  Bs. {precioUnitarioBs.toFixed(0)} c/u
-                </p>
-              </div>
+              {/* IMAGEN + PRECIO + CANTIDAD en fila */}
+              <div className="flex items-center gap-3">
+                <img
+                  src={item.image || `https://picsum.photos/300/300?random=${item.id}`}
+                  alt={item.name}
+                  className="w-50 h-50 rounded-xl object-cover flex-shrink-0"
+                />
 
-              {/* CANTIDAD */}
-              <div className="flex flex-col items-end gap-1">
-                <div className="flex items-center gap-1 border border-gray-200 rounded-xl px-2 py-1">
-                  <button
-                    onClick={() => {
-                      decreaseQuantity(item.id);
-                      setInputValues((prev) => ({
-                        ...prev,
-                        [item.id]: String(Math.max(1, item.quantity - 1)),
-                      }));
-                    }}
-                    className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center"
-                  >
-                    −
-                  </button>
-                  <input
-                    type="number"
-                    min={1}
-                    max={stockMax}
-                    value={inputValues[item.id] ?? item.quantity}
-                    onChange={(e) => handleInputChange(item.id, e.target.value)}
-                    onBlur={() => handleInputBlur(item.id, stockMax)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleInputBlur(item.id, stockMax);
-                    }}
-                    className="w-10 text-center text-sm font-semibold border-none outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <button
-                    onClick={() => {
-                      if (item.quantity >= stockMax) return;
-                      increaseQuantity(item.id);
-                      setInputValues((prev) => ({
-                        ...prev,
-                        [item.id]: String(item.quantity + 1),
-                      }));
-                    }}
-                    disabled={item.quantity >= stockMax}
-                    className={`text-lg font-bold w-6 text-center ${
-                      item.quantity >= stockMax
-                        ? "text-gray-300 cursor-not-allowed"
-                        : "text-gray-500 hover:text-black"
-                    }`}
-                  >
-                    +
-                  </button>
+                <p className="text-teal-500 font-bold text-sm flex-1">
+                  Bs. {Number(item.price).toFixed(0)} c/u
+                </p>
+
+                {/* CANTIDAD */}
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-1 border border-gray-200 rounded-xl px-2 py-1">
+                    <button
+                      onClick={() => {
+                        decreaseQuantity(item.id);
+                        setInputValues((prev) => ({
+                          ...prev,
+                          [item.id]: String(Math.max(1, item.quantity - 1)),
+                        }));
+                      }}
+                      className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center"
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      min={1}
+                      max={stockMax}
+                      value={inputValues[item.id] ?? item.quantity}
+                      onChange={(e) => handleInputChange(item.id, e.target.value)}
+                      onBlur={() => handleInputBlur(item.id, stockMax)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleInputBlur(item.id, stockMax);
+                      }}
+                      className="w-10 text-center text-sm font-semibold border-none outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      onClick={() => {
+                        if (item.quantity >= stockMax) return;
+                        increaseQuantity(item.id);
+                        setInputValues((prev) => ({
+                          ...prev,
+                          [item.id]: String(item.quantity + 1),
+                        }));
+                      }}
+                      disabled={item.quantity >= stockMax}
+                      className={`text-lg font-bold w-6 text-center ${
+                        item.quantity >= stockMax
+                          ? "text-gray-300 cursor-not-allowed"
+                          : "text-gray-500 hover:text-black"
+                      }`}
+                    >
+                      +
+                    </button>
+                  </div>
+                  {item.quantity >= stockMax && (
+                    <p className="text-red-400 text-xs">Stock máximo: {stockMax}</p>
+                  )}
                 </div>
-                {item.quantity >= stockMax && (
-                  <p className="text-red-400 text-xs">
-                    Stock máximo: {stockMax}
-                  </p>
-                )}
               </div>
             </div>
           );
@@ -408,8 +375,6 @@ function PasoPedido({
   );
 }
 
-// ── PASO 3 — MÉTODO DE PAGO ───────────────────────────────
-// ── PASO 3 — MÉTODO DE PAGO ───────────────────────────────
 function PasoPago({
   datos,
   onAtras,
@@ -423,41 +388,39 @@ function PasoPago({
   const [qrError, setQrError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
-  const tasa = 6.96;
-  const subtotalBs = cart.reduce((acc, i) => acc + i.price * tasa * i.quantity, 0);
+  const subtotalBs = cart.reduce((acc, i) => acc + i.price * i.quantity, 0);
   const totalBs = subtotalBs + 15;
 
-  // Genera el QR al montar el componente
   const qrGenerado = useRef(false);
 
-useEffect(() => {
-  if (qrGenerado.current) return;
-  qrGenerado.current = true;
+  useEffect(() => {
+    if (qrGenerado.current) return;
+    qrGenerado.current = true;
 
-  const generarQR = async () => {
-    setCargando(true);
-    setQrError(null);
-    try {
-      const res = await fetch("/api/qr", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: totalBs }),
-      });
-      const data = await res.json();
-      if (data.data?.image_base64) {
-        setQrImage(data.data.image_base64);
-      } else {
-        setQrError("No se pudo generar el QR. Intenta de nuevo.");
+    const generarQR = async () => {
+      setCargando(true);
+      setQrError(null);
+      try {
+        const res = await fetch("/api/qr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: totalBs }),
+        });
+        const data = await res.json();
+        if (data.data?.image_base64) {
+          setQrImage(data.data.image_base64);
+        } else {
+          setQrError("No se pudo generar el QR. Intenta de nuevo.");
+        }
+      } catch {
+        setQrError("Error de conexión. Intenta de nuevo.");
+      } finally {
+        setCargando(false);
       }
-    } catch {
-      setQrError("Error de conexión. Intenta de nuevo.");
-    } finally {
-      setCargando(false);
-    }
-  };
+    };
 
-  generarQR();
-}, []); // eslint-disable-line react-hooks/exhaustive-deps
+    generarQR();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (confirmado) {
     return (
@@ -483,14 +446,9 @@ useEffect(() => {
         <p className="font-bold text-teal-700 mb-1">QR — Banco BNB</p>
         <p className="text-sm text-teal-600 mb-3">Escanea el QR con tu app bancaria:</p>
 
-        {/* QR */}
         <div className="bg-white rounded-xl p-4 text-center mb-3 border border-teal-100 min-h-[160px] flex items-center justify-center">
-          {cargando && (
-            <p className="text-gray-400 text-sm">Generando QR...</p>
-          )}
-          {qrError && (
-            <p className="text-red-400 text-sm">{qrError}</p>
-          )}
+          {cargando && <p className="text-gray-400 text-sm">Generando QR...</p>}
+          {qrError && <p className="text-red-400 text-sm">{qrError}</p>}
           {qrImage && !cargando && (
             <img
               src={`data:image/png;base64,${qrImage}`}
@@ -531,7 +489,6 @@ useEffect(() => {
   );
 }
 
-// ── PAGE PRINCIPAL ────────────────────────────────────────
 export default function CheckoutPage() {
   const router = useRouter();
   const [pasoActual, setPasoActual] = useState(0);
@@ -543,7 +500,6 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* HEADER */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4">
         <button
           onClick={() => router.push("/")}
