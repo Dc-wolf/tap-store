@@ -61,6 +61,7 @@ model product {
   categoryRel          category?         @relation(fields: [categoryId], references: [id])
   categoryTypeRel      category_type?    @relation(fields: [categoryTypeId], references: [id])
   variants             product_variant[]
+  images               productimage[]    // ← NUEVO
 }
 
 model product_variant {
@@ -80,6 +81,7 @@ model productimage {
   id        Int       @id @default(autoincrement())
   url       String?
   productId Int?
+  product   product?  @relation(fields: [productId], references: [id]) // ← NUEVO
   createdAt DateTime? @default(now())
 }
 
