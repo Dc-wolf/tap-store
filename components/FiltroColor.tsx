@@ -25,9 +25,9 @@ export default function FiltroColor() {
   const searchParams = useSearchParams();
   const colorActual = searchParams.get("color");
 
-  const cambiar = (name: string) => {
+  const cambiar = (name: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (name === colorActual) {
+    if (!name) {
       params.delete("color");
     } else {
       params.set("color", name);
@@ -40,6 +40,19 @@ export default function FiltroColor() {
     <div>
       <h3 className="font-semibold mb-3">Color</h3>
       <div className="flex flex-wrap gap-2">
+        {/* Ver Todo */}
+        {/* Ver Todo */}
+<button
+  onClick={() => cambiar(null)}
+  title="Ver Todo"
+  className={`h-7 px-2 rounded-full border-2 transition text-xs font-medium ${
+    !colorActual
+      ? "border-black bg-gray-800 text-white scale-110"
+      : "border-gray-300 bg-gray-100 text-gray-500 hover:border-black hover:text-black"
+  }`}
+>
+  Todos
+</button>
         {colores.map((c) => (
           <button
             key={c.name}
@@ -54,9 +67,6 @@ export default function FiltroColor() {
           />
         ))}
       </div>
-      {colorActual && (
-        <p className="text-xs text-gray-500 mt-2">Color: {colorActual}</p>
-      )}
     </div>
   );
 }

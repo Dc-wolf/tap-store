@@ -6,14 +6,15 @@ import { useState } from "react";
 export default function FiltroPrecio() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const precioActual = searchParams.get("precio");
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
 
-  const cambiarPrecio = (value: string) => {
+  const cambiarPrecio = (value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (value === precioActual) {
+    if (!value) {
+      params.delete("precio");
+    } else if (value === precioActual) {
       params.delete("precio");
     } else {
       params.set("precio", value);
@@ -30,34 +31,8 @@ export default function FiltroPrecio() {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
-  <h3 className="font-semibold">Precio</h3>
-  {precioActual && (
-    <button
-  onClick={() => {
-    if (precioActual) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("precio");
-      params.set("page", "1");
-      setMin("");
-      setMax("");
-      router.push(`/?${params.toString()}`);
-    } else {
-      aplicarCustom();
-    }
-  }}
-  className={`w-full text-sm py-1 rounded mb-3 transition ${
-    precioActual
-      ? "bg-red-500 text-white hover:bg-red-600"
-      : "bg-black text-white hover:bg-gray-800"
-  }`}
->
-  {precioActual ? "✕ Limpiar precio" : "Aplicar"}
-</button>
-  )}
-</div>
+      <h3 className="font-semibold mb-3">Precio</h3>
 
-      {/* Inputs mín/máx */}
       <div className="flex gap-2 mb-2">
         <input
           placeholder="mín."
@@ -81,24 +56,36 @@ export default function FiltroPrecio() {
         Aplicar
       </button>
 
-      {/* Radios predefinidos */}
       <div className="flex flex-col gap-2 text-sm">
-        {[
-          { label: "menos de Bs. 15.00", value: "0-15" },
-          { label: "Bs. 15.00 hasta Bs. 30.00", value: "15-30" },
-          { label: "Bs. 30.00 hasta Bs. 60.00", value: "30-60" },
-          { label: "más de Bs. 100.00", value: "100-9999" },
-        ].map((r) => (
-          <label key={r.value} className="flex items-center gap-2">
-            <input
-              type="radio"
-              checked={precioActual === r.value}
-              onChange={() => cambiarPrecio(r.value)}
-            />
-            {r.label}
-          </label>
-        ))}
-      </div>
+  <label className="flex items-center gap-2 font-medium">
+    <input
+      type="radio"
+      checked={!precioActual}
+      onChange={() => {
+        setMin("");
+        setMax("");
+        cambiarPrecio(null);
+      }}
+    />
+    Ver Todo
+  </label>
+  <hr className="border-gray-200 my-1" />
+  {[
+    { label: "menos de Bs. 15.00", value: "0-15" },
+    { label: "Bs. 15.00 hasta Bs. 30.00", value: "15-30" },
+    { label: "Bs. 30.00 hasta Bs. 60.00", value: "30-60" },
+    { label: "más de Bs. 100.00", value: "100-9999" },
+  ].map((r) => (
+    <label key={r.value} className="flex items-center gap-2">
+      <input
+        type="radio"
+        checked={precioActual === r.value}
+        onChange={() => cambiarPrecio(r.value)}
+      />
+      {r.label}
+    </label>
+  ))}
+</div>
     </div>
   );
 }

@@ -19,9 +19,9 @@ export default function FiltroCategoria() {
   const searchParams = useSearchParams();
   const categoriaActual = searchParams.get("categoria");
 
-  const cambiar = (slug: string) => {
+  const cambiar = (slug: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (slug === categoriaActual) {
+    if (!slug) {
       params.delete("categoria");
     } else {
       params.set("categoria", slug);
@@ -32,34 +32,24 @@ export default function FiltroCategoria() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-3">
-  <h3 className="font-semibold">Categoría</h3>
-  {categoriaActual && (
-    <button
-      onClick={() => {
-        const params = new URLSearchParams(searchParams.toString());
-        params.delete("categoria");
-        params.set("page", "1");
-        router.push(`/?${params.toString()}`);
-      }}
-      className="text-xs text-gray-400 hover:text-red-500 transition"
-    >
-      limpiar
-    </button>
-  )}
-</div>
+      <h3 className="font-semibold mb-3">Categoría</h3>
       <div className="flex flex-col gap-2 text-sm">
-        {categorias.map((cat) => (
-          <label key={cat.slug} className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={categoriaActual === cat.slug}
-              onChange={() => cambiar(cat.slug)}
-            />
-            {cat.name}
-          </label>
-        ))}
-      </div>
+  <label className="flex items-center gap-2 cursor-pointer font-medium">
+    <input type="checkbox" checked={!categoriaActual} onChange={() => cambiar(null)} />
+    Ver Todo
+  </label>
+  <hr className="border-gray-200 my-1" />
+  {categorias.map((cat) => (
+    <label key={cat.slug} className="flex items-center gap-2 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={categoriaActual === cat.slug}
+        onChange={() => cambiar(cat.slug)}
+      />
+      {cat.name}
+    </label>
+  ))}
+</div>
     </div>
   );
 }
