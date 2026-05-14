@@ -25,7 +25,22 @@ export default function FiltroTalla() {
 
   return (
     <div>
-      <h3 className="font-semibold mb-3">Talla</h3>
+      <div className="flex items-center gap-2 mb-3">
+  <h3 className="font-semibold">Talla</h3>
+  {tallaActual && (
+    <button
+      onClick={() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("talla");
+        params.set("page", "1");
+        router.push(`/?${params.toString()}`);
+      }}
+      className="text-xs bg-red-100 text-red-500 hover:bg-red-200 transition px-2 py-0.5 rounded-full"
+    >
+      Borrar Talla
+    </button>
+  )}
+</div>
 
       <div className="flex flex-col gap-2 text-sm">
         {tallas.map((t) => (

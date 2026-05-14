@@ -30,7 +30,32 @@ export default function FiltroPrecio() {
 
   return (
     <div>
-      <h3 className="font-semibold mb-3">Precio</h3>
+      <div className="flex items-center gap-2 mb-3">
+  <h3 className="font-semibold">Precio</h3>
+  {precioActual && (
+    <button
+  onClick={() => {
+    if (precioActual) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("precio");
+      params.set("page", "1");
+      setMin("");
+      setMax("");
+      router.push(`/?${params.toString()}`);
+    } else {
+      aplicarCustom();
+    }
+  }}
+  className={`w-full text-sm py-1 rounded mb-3 transition ${
+    precioActual
+      ? "bg-red-500 text-white hover:bg-red-600"
+      : "bg-black text-white hover:bg-gray-800"
+  }`}
+>
+  {precioActual ? "✕ Limpiar precio" : "Aplicar"}
+</button>
+  )}
+</div>
 
       {/* Inputs mín/máx */}
       <div className="flex gap-2 mb-2">

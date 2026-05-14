@@ -32,7 +32,22 @@ export default function FiltroCategoria() {
 
   return (
     <div>
-      <h3 className="font-semibold mb-3">Categoría</h3>
+      <div className="flex justify-between items-center mb-3">
+  <h3 className="font-semibold">Categoría</h3>
+  {categoriaActual && (
+    <button
+      onClick={() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("categoria");
+        params.set("page", "1");
+        router.push(`/?${params.toString()}`);
+      }}
+      className="text-xs text-gray-400 hover:text-red-500 transition"
+    >
+      limpiar
+    </button>
+  )}
+</div>
       <div className="flex flex-col gap-2 text-sm">
         {categorias.map((cat) => (
           <label key={cat.slug} className="flex items-center gap-2 cursor-pointer">
