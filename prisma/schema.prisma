@@ -61,7 +61,14 @@ model product {
   categoryRel          category?         @relation(fields: [categoryId], references: [id])
   categoryTypeRel      category_type?    @relation(fields: [categoryTypeId], references: [id])
   variants             product_variant[]
-  images               productimage[]    // ← NUEVO
+  images               productimage[]
+
+  @@index([status, visibility])
+  @@index([categoryId])
+  @@index([categoryTypeId])
+  @@index([oferta])
+  @@index([price])
+  @@index([createdAt])
 }
 
 model product_variant {
@@ -75,13 +82,17 @@ model product_variant {
   size      size    @relation(fields: [sizeId], references: [id])
 
   @@unique([productId, colorId, sizeId])
+  @@index([productId])
+  @@index([colorId])
+  @@index([sizeId])
+  @@index([stock])
 }
 
 model productimage {
   id        Int       @id @default(autoincrement())
   url       String?
   productId Int?
-  product   product?  @relation(fields: [productId], references: [id]) // ← NUEVO
+  product   product?  @relation(fields: [productId], references: [id])
   createdAt DateTime? @default(now())
 }
 

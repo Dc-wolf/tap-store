@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCart } from "./CartContext";
 import { useRouter } from "next/navigation";
 import ProductoModal from "./ProductoModal";
+import Image from "next/image";
 
 type Producto = {
   id: number;
@@ -23,19 +24,26 @@ type CartItem = {
 };
 
 export default function ProductCard({ producto }: { producto: Producto }) {
-  const { addToCart, replaceCart, cart, increaseQuantity, decreaseQuantity } = useCart();
+  const { addToCart, replaceCart, cart, increaseQuantity, decreaseQuantity } =
+    useCart();
   const router = useRouter();
   const [modalAbierto, setModalAbierto] = useState(false);
   const [inputValue, setInputValue] = useState<string>("0");
 
-  const cantidad = cart.find((i: CartItem) => i.id === producto.id)?.quantity ?? 0;
+  const cantidad =
+    cart.find((i: CartItem) => i.id === producto.id)?.quantity ?? 0;
   const stockDisponible = producto.stock ?? 0;
-  const displayValue = cantidad === 0 ? "0" : (inputValue === "0" ? String(cantidad) : inputValue);
+  const displayValue =
+    cantidad === 0 ? "0" : inputValue === "0" ? String(cantidad) : inputValue;
 
   const handleIncrease = () => {
     if (cantidad >= stockDisponible) return;
     if (cantidad === 0) {
-      addToCart({ ...producto, name: producto.name ?? "", price: producto.price ?? 0 });
+      addToCart({
+        ...producto,
+        name: producto.name ?? "",
+        price: producto.price ?? 0,
+      });
       setInputValue("1");
     } else {
       increaseQuantity(producto.id);
@@ -57,7 +65,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
     if (clamped !== cantidad) {
       replaceCart(
         { ...producto, name: producto.name ?? "", price: producto.price ?? 0 },
-        clamped
+        clamped,
       );
     }
   };
@@ -65,7 +73,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
   const comprarAhora = () => {
     replaceCart(
       { ...producto, name: producto.name ?? "", price: producto.price ?? 0 },
-      cantidad > 0 ? cantidad : 1
+      cantidad > 0 ? cantidad : 1,
     );
     router.push("/checkout");
   };
@@ -73,13 +81,23 @@ export default function ProductCard({ producto }: { producto: Producto }) {
   return (
     <>
       <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden">
-
         {/* IMAGEN CON BADGE */}
-        <div className="relative cursor-pointer" onClick={() => setModalAbierto(true)}>
-          <img
-            src={producto.image || `https://picsum.photos/300/300?random=${producto.id}`}
-            className="w-full h-52 object-cover"
+        {/* IMAGEN CON BADGE */}
+        <div
+          className="relative h-52 cursor-pointer"
+          onClick={() => setModalAbierto(true)}
+        >
+          <Image
+            src={
+              producto.image && producto.image !== "NULL"
+                ? producto.image
+                : `https://picsum.photos/300/300?random=${producto.id}`
+            }
             alt={producto.name ?? "Producto"}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+            loading="lazy"
           />
           <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
             Popular
@@ -88,7 +106,9 @@ export default function ProductCard({ producto }: { producto: Producto }) {
 
         {/* INFO */}
         <div className="p-4">
-          <h3 className="font-bold text-gray-900 text-base">{producto.name ?? "Sin nombre"}</h3>
+          <h3 className="font-bold text-gray-900 text-base">
+            {producto.name ?? "Sin nombre"}
+          </h3>
           <p className="text-gray-400 text-sm mt-0.5 truncate">
             {producto.description || "Sin descripción"}
           </p>
@@ -103,8 +123,19 @@ export default function ProductCard({ producto }: { producto: Producto }) {
               onClick={comprarAhora}
               className="flex-1 bg-teal-500 hover:bg-teal-600 text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 6h13M7 13L5.4 5M10 21a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="white"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 6h13M7 13L5.4 5M10 21a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z"
+                />
               </svg>
               COMPRAR AHORA
             </button>
@@ -116,7 +147,9 @@ export default function ProductCard({ producto }: { producto: Producto }) {
                   setInputValue(String(Math.max(0, cantidad - 1)));
                 }}
                 className="text-gray-500 hover:text-black text-lg font-bold w-6 text-center"
-              >−</button>
+              >
+                −
+              </button>
               <input
                 type="number"
                 min={1}
@@ -137,7 +170,9 @@ export default function ProductCard({ producto }: { producto: Producto }) {
                     ? "text-gray-300 cursor-not-allowed"
                     : "text-gray-500 hover:text-black"
                 }`}
-              >+</button>
+              >
+                +
+              </button>
             </div>
           </div>
 
@@ -146,7 +181,6 @@ export default function ProductCard({ producto }: { producto: Producto }) {
             <p className="text-red-400 text-xs mt-2">Stock máximo alcanzado</p>
           )}
         </div>
-
       </div>
 
       {/* MODAL */}

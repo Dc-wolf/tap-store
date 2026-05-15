@@ -1,4 +1,5 @@
-export const dynamic = "force-dynamic";
+
+export const revalidate = 600; // refresca cada 2 minutos
 
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
